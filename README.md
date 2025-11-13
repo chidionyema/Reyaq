@@ -112,6 +112,12 @@ The project uses Inter font from Google Fonts. To change, update:
 1. `app/globals.css` - Import statement
 2. `tailwind.config.ts` - Font family configuration
 
+### Icon / Favicon
+
+- The app favicon lives at `app/icon.svg`; replace it with your own SVG or use `app/icon.png` if preferred.
+- For classic favicons, drop additional sizes in `public/` (for example `public/favicon.ico`).
+- After changes, restart the dev server and hard-refresh the browser to bust favicon cache.
+
 ## 📁 Project Structure
 
 ```
