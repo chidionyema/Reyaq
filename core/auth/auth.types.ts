@@ -1,6 +1,9 @@
-import type { Profile } from '@prisma/client'
-
-export type AuthenticatedProfile = Profile
+export type AuthenticatedProfile = {
+  userId: string
+  email: string
+  fullName?: string | null
+  avatarUrl?: string | null
+}
 
 export type AuthContext = {
   profile: AuthenticatedProfile

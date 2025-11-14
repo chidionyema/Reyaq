@@ -1,8 +1,20 @@
 import type { User } from '@supabase/supabase-js'
 import { prisma } from '@/lib/prisma'
 import { createSupabaseRouteClient } from '@/lib/supabase/server'
-import type { AuthContext } from './auth.types'
+import type { AuthContext, AuthenticatedProfile } from './auth.types'
 import { eventBus } from '../events/event-bus'
+
+const toAuthenticatedProfile = (payload: {
+  userId: string
+  email: string
+  fullName: string | null
+  avatarUrl: string | null
+}): AuthenticatedProfile => ({
+  userId: payload.userId,
+  email: payload.email,
+  fullName: payload.fullName,
+  avatarUrl: payload.avatarUrl,
+})
 
 export const syncProfileFromAuthUser = async (authUser: User) => {
   const profile = await prisma.profile.upsert({
@@ -23,7 +35,7 @@ export const syncProfileFromAuthUser = async (authUser: User) => {
 
   eventBus.emit('user_logged_in', { userId: profile.userId })
 
-  return profile
+  return toAuthenticatedProfile(profile)
 }
 
 export const authenticateRequest = async (): Promise<AuthContext> => {
