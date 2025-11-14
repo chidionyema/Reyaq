@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase/server'
 import { syncProfileFromAuthUser } from '@/core/auth/auth.service'
 
+export const runtime = 'nodejs'
+
 const errorRedirect = (requestUrl: URL, message = 'auth') =>
   NextResponse.redirect(new URL(`/login?error=${message}`, requestUrl.origin))
 
