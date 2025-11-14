@@ -17,6 +17,17 @@ const toAuthenticatedProfile = (payload: {
 })
 
 export const syncProfileFromAuthUser = async (authUser: User) => {
+  const rawUrl = process.env.DATABASE_URL ?? ''
+  if (!rawUrl) {
+    console.error('[DB] DATABASE_URL missing')
+  } else {
+    const maskedUrl = rawUrl.replace(
+      /\/\/([^:]+):([^@]+)@/,
+      (_match, user) => `//${user}:***@`
+    )
+    console.error('[DB] DATABASE_URL (masked):', maskedUrl)
+  }
+
   const profile = await prisma.profile.upsert({
     where: { userId: authUser.id },
     update: {
