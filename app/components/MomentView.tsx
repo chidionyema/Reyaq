@@ -1,14 +1,22 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import type { Moment } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { useApi } from '@/app/hooks/useApi'
 import { useAuthSession } from '@/app/hooks/useAuthSession'
 import SynclightPulse from './SynclightPulse'
 
+type MomentViewModel = {
+  id: string
+  prompt: string
+  userAId: string
+  userBId: string
+  userAResponse: string | null
+  userBResponse: string | null
+}
+
 type Props = {
-  moment: Moment
+  moment: MomentViewModel
   roomId?: string
   isSynclight?: boolean
 }
@@ -62,7 +70,7 @@ export default function MomentView({ moment, roomId, isSynclight }: Props) {
     setSubmitting(true)
     setError(null)
     try {
-      const data = await api<{ moment: Moment }>('/api/moment/respond', {
+      const data = await api<{ moment: MomentViewModel }>('/api/moment/respond', {
         method: 'POST',
         body: { momentId: moment.id, response: response.trim() },
       })

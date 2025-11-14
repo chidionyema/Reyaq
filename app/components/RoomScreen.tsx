@@ -1,14 +1,32 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { Message, Moment, Room } from '@prisma/client'
 import { useApi } from '@/app/hooks/useApi'
 import { useRealtimeChannel } from '@/app/hooks/useRealtimeChannel'
 import { useAuthSession } from '@/app/hooks/useAuthSession'
 
-type RoomPayload = Room & {
-  moments: Moment[]
-  messages: Message[]
+type RoomMessage = {
+  id: string
+  roomId: string
+  senderId: string
+  content: string
+  createdAt: string
+}
+
+type RoomMoment = {
+  id: string
+  prompt: string
+  createdAt: string
+  userAResponse: string | null
+  userBResponse: string | null
+}
+
+type RoomPayload = {
+  id: string
+  userAId: string
+  userBId: string
+  moments: RoomMoment[]
+  messages: RoomMessage[]
 }
 
 type RoomResponse = {
@@ -16,7 +34,7 @@ type RoomResponse = {
 }
 
 type MessageEvent = {
-  message: Message
+  message: RoomMessage
 }
 
 type Props = {
@@ -115,7 +133,7 @@ export default function RoomScreen({ roomId }: Props) {
     )
   }
 
-  const isOwnMessage = (message: Message) =>
+  const isOwnMessage = (message: RoomMessage) =>
     message.senderId === session?.user?.id
 
   return (

@@ -3,10 +3,10 @@ import { getSupabaseServiceClient } from '@/lib/supabase/service'
 import { createLogger } from '@/utils/helpers'
 
 const logger = createLogger('realtime-publisher')
-const supabase = getSupabaseServiceClient()
 const channels = new Map<string, RealtimeChannel>()
 
 const getChannel = (name: string) => {
+  const supabase = getSupabaseServiceClient()
   let channel = channels.get(name)
   if (!channel) {
     channel = supabase.channel(name, { config: { broadcast: { ack: true } } })
@@ -25,7 +25,7 @@ const send = async (channelName: string, event: string, payload: unknown) => {
     event,
     payload,
   })
-  if ('error' in response && response.error) {
+  if (response !== 'ok') {
     logger.error('Realtime send failed', { response, channelName, event })
   }
 }
