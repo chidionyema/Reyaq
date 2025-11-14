@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  email     String
+  fullName  String?  @map("full_name")
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  momentsA Moment[] @relation("MomentsA")
+  momentsB Moment[] @relation("MomentsB")
+  roomsA   Room[]   @relation("RoomsA")
+  roomsB   Room[]   @relation("RoomsB")
+
+  @@map("profiles")
+}
+
+model Moment {
+  id            String   @id @default(uuid()) @db.Uuid
+  createdAt     DateTime @default(now())
+  userAId       String   @map("user_a_id") @db.Uuid
+  userBId       String   @map("user_b_id") @db.Uuid
+  mood          String
+  prompt        String
+  userAResponse String?
+  userBResponse String?
+  synclight     Boolean  @default(false)
+  roomId        String?  @map("room_id") @db.Uuid
+
+  userA Profile @relation("MomentsA", fields: [userAId], references: [userId])
+  userB Profile @relation("MomentsB", fields: [userBId], references: [userId])
+  room  Room? @relation(fields: [roomId], references: [id])
+
+  @@map("moments")
+}
+
+model Room {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  userAId   String   @map("user_a_id") @db.Uuid
+  userBId   String   @map("user_b_id") @db.Uuid
+
+  userA    Profile   @relation("RoomsA", fields: [userAId], references: [userId])
+  userB    Profile   @relation("RoomsB", fields: [userBId], references: [userId])
+  messages Message[]
+  moments  Moment[]
+
+  @@map("rooms")
+}
+
+model Message {
+  id        String   @id @default(uuid()) @db.Uuid
+  roomId    String   @map("room_id") @db.Uuid
+  senderId  String   @map("sender_id") @db.Uuid
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  room Room @relation(fields: [roomId], references: [id])
+
+  @@map("messages")
+}
+
+

@@ -1,171 +1,190 @@
-# REYAQ Landing Page
+# Reyaq MVP – Synchronous Co‑Creation
 
-A beautiful, production-ready landing page for REYAQ - the first co-creation platform.
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+ installed
-- npm or yarn
-
-### Installation
-
-1. Install dependencies:
-```bash
-npm install
-```
-
-2. Run the development server:
-```bash
-npm run dev
-```
-
-3. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## 📦 Build for Production
-
-```bash
-npm run build
-npm start
-```
-
-## 🚢 Deploy to Vercel
-
-### Option 1: Vercel CLI
-
-1. Install Vercel CLI:
-```bash
-npm i -g vercel
-```
-
-2. Deploy:
-```bash
-vercel
-```
-
-### Option 2: GitHub Integration
-
-1. Push your code to GitHub
-2. Import your repository in [Vercel](https://vercel.com)
-3. Vercel will automatically detect Next.js and deploy
-
-### Option 3: Vercel Dashboard
-
-1. Go to [vercel.com](https://vercel.com)
-2. Click "New Project"
-3. Import your Git repository
-4. Vercel will auto-configure everything
-
-## 📧 Email Capture Setup
-
-The email capture form currently uses a placeholder API route at `/app/api/subscribe/route.ts`.
-
-To integrate with a real email service:
-
-### Using Resend (Recommended)
-
-1. Install Resend:
-```bash
-npm install resend
-```
-
-2. Get your API key from [resend.com](https://resend.com)
-
-3. Update `app/api/subscribe/route.ts`:
-```typescript
-import { Resend } from 'resend'
-
-const resend = new Resend(process.env.RESEND_API_KEY)
-
-// In your POST handler:
-await resend.emails.send({
-  from: 'onboarding@resend.dev',
-  to: email,
-  subject: 'Welcome to Reyaq',
-  html: '<p>Thanks for joining!</p>',
-})
-
-// Also save to your database
-```
-
-### Using Other Services
-
-- **SendGrid**: Use `@sendgrid/mail`
-- **Mailchimp**: Use `@mailchimp/mailchimp_marketing`
-- **ConvertKit**: Use their REST API
-
-## 🎨 Customization
-
-### Colors
-
-Edit `tailwind.config.ts` to modify brand colors:
-- `reyaq-violet`: #9A4DF3
-- `reyaq-ember`: #FFB267
-- `pulse-pink`: #EB4CC0
-- `mist-white`: #F6F4F9
-- `ink-shadow`: #1A1A1F
-
-### Typography
-
-The project uses Inter font from Google Fonts. To change, update:
-1. `app/globals.css` - Import statement
-2. `tailwind.config.ts` - Font family configuration
-
-### Icon / Favicon
-
-- The app favicon lives at `app/icon.svg`; replace it with your own SVG or use `app/icon.png` if preferred.
-- For classic favicons, drop additional sizes in `public/` (for example `public/favicon.ico`).
-- After changes, restart the dev server and hard-refresh the browser to bust favicon cache.
-
-## 📁 Project Structure
-
-```
-reyaq/
-├── app/
-│   ├── api/
-│   │   └── subscribe/
-│   │       └── route.ts      # Email capture API
-│   ├── globals.css           # Global styles
-│   ├── layout.tsx            # Root layout
-│   └── page.tsx              # Home page
-├── components/
-│   ├── Hero.tsx              # Hero section
-│   ├── Features.tsx          # How it works
-│   ├── WhyReyaq.tsx          # Feature cards
-│   ├── Vision.tsx            # Vision section
-│   ├── EmailCapture.tsx      # Email form
-│   └── Footer.tsx            # Footer
-├── tailwind.config.ts        # Tailwind configuration
-├── tsconfig.json             # TypeScript config
-└── package.json              # Dependencies
-```
-
-## 🎭 Animations
-
-The project includes custom animations:
-- `fade-in`: Gentle fade in
-- `fade-in-up`: Fade in with upward motion
-- `pulse-soft`: Subtle pulsing effect
-- `drift`: Slow drifting motion for orbs
-- `spark`: Sparkle animation
-
-All animations are defined in `tailwind.config.ts`.
-
-## 🔧 Environment Variables
-
-Create a `.env.local` file for production:
-
-```env
-RESEND_API_KEY=your_key_here
-DATABASE_URL=your_database_url
-```
-
-## 📝 License
-
-Private - All rights reserved.
+This repo hosts the first functional slice of **Reyaq**, a synchronous, two-person co-creation product built as a **lean modular monolith**. The MVP proves behaviour (mood matching ➜ ritual ➜ room) without painting us into a corner: core business logic sits in `/core`, API routes stay thin, React components stay presentation-only, and Supabase handles auth + realtime + Postgres (via Prisma).
 
 ---
 
-**Made for moments.** ✨
+## Tech Stack
 
+- **Next.js 14 App Router** (React Server Components + API routes)
+- **TypeScript** end-to-end
+- **Supabase** for auth, Postgres, storage, realtime broadcast
+- **Prisma** (schema, migrations, typed data access)
+- **Tailwind CSS** for design system tokens
+- **Event-driven core** via a lightweight in-memory bus in `/core/events`
+
+---
+
+## Project Structure (Modular Monolith)
+
+```
+core/
+  auth/           # Supabase auth wrapper + request context
+  moods/          # Mood catalog + validation
+  matching/       # Queue + realtime match orchestration
+  moments/        # Shared moments + ritual engine
+  rooms/          # Room lifecycle + access control
+  chat/           # Messaging writes + events
+  synclight/      # Synclight logic + thresholds
+  events/         # Event bus + Supabase realtime publisher
+
+app/
+  api/            # Thin API routes that call into /core
+  app/            # Authenticated experience (/app, /app/matching, /app/moment/[id], /app/room/[id])
+  auth/           # OAuth callback handler
+  login/          # Google OAuth entry point
+  components/     # View-only React components (renders inside / and /app layouts)
+  hooks/          # Client hooks (auth session, api helper, realtime channel)
+
+db/
+  prisma.schema   # Source of truth for Prisma + Supabase
+  migrations/     # SQL snapshot (0001_init.sql)
+```
+
+React components **never** import business logic—only data returned from services or constants. Server-only modules (`*.server.ts`) ensure secrets (service role key) stay off the client bundle.
+
+---
+
+## Environment Variables
+
+Copy `env.example` to `.env.local` (and `.env` for Prisma CLI) and fill these:
+
+```
+DATABASE_URL=postgres://USER:PASSWORD@HOST:5432/postgres?sslmode=require
+NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<public-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000   # or your deployed origin
+```
+
+> Supabase: Project Settings → Database → “Connection string: URI” contains the correct `DATABASE_URL`. Keep the service role key server-only (only `lib/supabase/service.ts` uses it). `NEXT_PUBLIC_SITE_URL` must match the redirect origin configured in Supabase auth settings.
+
+### Supabase Auth setup
+
+1. In Supabase dashboard → **Authentication → Providers**, enable **Google** and supply client ID/secret (Google Cloud → Credentials).
+2. Under **Authentication → URL configuration**, set the redirect to `${NEXT_PUBLIC_SITE_URL}/auth/callback`.
+3. Hit “Save”, then test by visiting `/login` locally.
+
+### Database + RLS
+
+Run the migrations with:
+
+```bash
+npm run db:push        # push Prisma schema (profiles, rooms, moments, messages)
+psql ... < db/migrations/0002_profiles_rls.sql   # or run the SQL in Supabase SQL editor
+```
+
+The RLS script enables per-user policies on `profiles` so Supabase can enforce row access on the hosted Postgres instance.
+
+---
+
+## Getting Started
+
+1. **Install deps**
+   ```bash
+   npm install
+   ```
+2. **Generate Prisma client**
+   ```bash
+   npm run db:generate
+   ```
+3. **Push schema to Supabase Postgres (or local Postgres)**
+   ```bash
+   npm run db:push
+   ```
+   > Prefer migrations? Create them via `npx prisma migrate dev --schema db/prisma.schema`.
+4. **Start dev server**
+   ```bash
+   npm run dev
+   ```
+5. **Auth** – visit [`/login`](http://localhost:3000/login) and click “Continue with Google”. Supabase handles the OAuth redirect → `/auth/callback`, syncs your profile into Postgres, then middleware routes you into `/app`.
+
+---
+
+### Authentication UX
+
+- `/login` renders `SocialLoginButtons` (Google OAuth). Once authenticated, users are redirected to `/app`.
+- Landing hero retains the “Enter Reyaq” CTA plus an inline Google login toggle.
+- `/auth/callback` exchanges the Supabase code for a session, calls `syncProfileFromAuthUser`, and drops users into `/app`.
+- `/app` routes (mood, matching, ritual, room) sit behind `middleware.ts` + a server layout that fetches the current profile and renders `UserNav` (avatar/email/sign out).
+
+---
+
+## Domain Overview
+
+| Module          | Responsibility                                                                          |
+|-----------------|------------------------------------------------------------------------------------------|
+| `core/auth`     | Uses Supabase SSR helpers, syncs `profiles`, emits `user_logged_in`.                     |
+| `core/moods`    | Static mood catalogue + validation + `mood_selected` event.                              |
+| `core/matching` | In-memory per-mood queues, synclight detection, match orchestration, realtime broadcast. |
+| `core/moments`  | Ritual engine + prompt generation, response recording, `moment_started/completed`.      |
+| `core/rooms`    | Deterministic room creation (sorted user pair) + guard rails for reads.                 |
+| `core/chat`     | Message creation, emits `message_sent`, pushes to Supabase realtime room channel.        |
+| `core/events`   | EventEmitter bus + Supabase realtime publisher (`user:{id}`, `room:{id}` channels).      |
+| `core/synclight`| Window calculation (default 10s) + emit helper.                                          |
+
+Queues + ritual definitions live fully in memory today, but the structure supports swapping to Redis or JSON definitions later without touching the UI.
+
+---
+
+## API Surface (App Router)
+
+| Route                        | Method | Description                                      |
+|------------------------------|--------|--------------------------------------------------|
+| `/api/mood/select`           | POST   | Validate mood, emit `mood_selected`.             |
+| `/api/match/request`         | POST   | Add user to queue, maybe return match.           |
+| `/api/moment/respond`        | POST   | Persist ritual response, emit `moment_completed`.|
+| `/api/room/create`           | POST   | Deterministically create/find room for pair.     |
+| `/api/room/[id]`             | GET    | Fetch room, guard membership.                    |
+| `/api/room/[id]/message`     | POST   | Send chat message + realtime broadcast.          |
+
+Every route authenticates via `core/auth/auth.service.ts` and only delegates to `/core` services.
+
+---
+
+## Frontend Flows
+
+- **Marketing (`/`)** – same landing surface, now with inline Google login + CTA to `/login`.
+- **Authenticated area (`/app`)** – mood selection, matching waitroom, ritual, and room log/chat now live under the `/app` segment (protected by middleware + SSR layout).
+- **Mood Selection (`/app`)** – shows five moods, calls `/api/mood/select` + `/api/match/request`, routes to `/app/matching` or `/app/moment/[id]`.
+- **Matching Waitroom (`/app/matching`)** – listens on Supabase realtime `user:{id}`, displays Synclight pulse.
+- **Moment Ritual (`/app/moment/[id]`)** – runs Finish-My-Thought, reveals when both sides submit, lets users go again, exit, or jump to the room.
+- **Room (`/app/room/[id]`)** – shows shared moments log + realtime chat (channel `room:{id}`).
+
+Marketing and product now live side-by-side without code duplication.
+
+---
+
+## Realtime & Eventing
+
+- `core/events/event-bus.ts` is a tiny wrapper around Node’s `EventEmitter`.
+- `core/events/realtime.publisher.ts` mirrors events to Supabase broadcast channels:
+  - `user:{userId}` – match notifications.
+  - `room:{roomId}` – chat messages (and future room events).
+- Supabase client usage is split into `lib/supabase/service.ts` (service role, server-only) and `lib/supabase/{client,server}.ts` (browser + SSR) to keep secrets off the client bundle.
+
+> Important: the matching queue is in-memory per Node process. For multi-region/scale you’d swap `core/matching/matching.logic.ts` with Redis or Supabase storage, leaving the rest untouched.
+
+---
+
+## Scripts Reference
+
+| Command               | Purpose                                    |
+|-----------------------|--------------------------------------------|
+| `npm run dev`         | Next.js dev server                         |
+| `npm run build`       | Production build                           |
+| `npm run db:push`     | Push Prisma schema → DB (`db/prisma.schema`)|
+| `npm run db:migrate`  | Apply migrations in production             |
+| `npm run db:studio`   | Launch Prisma Studio                       |
+| `npm run db:generate` | Regenerate Prisma Client                   |
+
+---
+
+## Next Steps / Notes
+
+- Add a Supabase-powered onboarding flow (magic links, phone, etc.) so test users can authenticate without manual token injection.
+- Persist the matching queue externally for horizontal scale and failover.
+- Extend the ritual engine with additional JSON definitions inside `core/moments/rituals`.
+- Add automated tests around matching + ritual completion (current MVP focuses on behaviour delivery).
+
+**What we make, makes us.**

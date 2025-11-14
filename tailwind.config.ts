@@ -28,6 +28,7 @@ const config: Config = {
         'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
         'drift': 'drift 20s ease-in-out infinite',
         'spark': 'spark 2s ease-in-out infinite',
+        synclight: 'synclight 1.8s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -50,6 +51,11 @@ const config: Config = {
         spark: {
           '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
           '50%': { opacity: '1', transform: 'scale(1.2)' },
+        },
+        synclight: {
+          '0%': { transform: 'translateX(-100%)' },
+          '50%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(100%)' },
         },
       },
     },
