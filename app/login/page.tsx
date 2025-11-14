@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons'
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export default async function LoginPage() {
   const supabase = createSupabaseServerComponentClient()
   const {

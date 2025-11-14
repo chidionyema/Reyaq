@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma'
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server'
 import UserNav from '@/app/components/UserNav'
 
+export const dynamic = 'force-dynamic'
+
 type Props = {
   children: ReactNode
 }
