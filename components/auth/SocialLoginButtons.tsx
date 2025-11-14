@@ -5,15 +5,21 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL
 
-if (!SITE_URL) {
-  throw new Error('NEXT_PUBLIC_SITE_URL is not set')
-}
-
 type Provider = 'google'
 
 const PROVIDERS: { id: Provider; label: string }[] = [
   { id: 'google', label: 'Continue with Google' },
 ]
+
+const getRedirectUrl = () => {
+  if (SITE_URL) {
+    return `${SITE_URL}/auth/callback`
+  }
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/auth/callback`
+  }
+  return null
+}
 
 export default function SocialLoginButtons() {
   const supabase = getSupabaseBrowserClient()
@@ -24,10 +30,14 @@ export default function SocialLoginButtons() {
     setLoadingProvider(provider)
     setError(null)
     try {
+      const redirectTo = getRedirectUrl()
+      if (!redirectTo) {
+        throw new Error('NEXT_PUBLIC_SITE_URL is not configured')
+      }
       await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${SITE_URL}/auth/callback`,
+          redirectTo,
         },
       })
     } catch (err) {
