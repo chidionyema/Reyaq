@@ -124,7 +124,7 @@ export const getRoomById = async (roomId: string, viewerId: string) => {
       .order('createdAt', { ascending: true }),
     supabase
       .from('messages')
-      .select('*')
+      .select('id, room_id, sender_id, content, created_at')
       .eq('room_id', roomId)
       .order('created_at', { ascending: true }),
   ])

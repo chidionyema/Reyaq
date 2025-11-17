@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto'
 import { getSupabaseServiceClient } from '@/lib/supabase/service'
 import { eventBus } from '../events/event-bus'
+import { broadcastToUser } from '../events/realtime.publisher'
 import { createRitualContext, getRitual } from './rituals/ritual-engine'
 import type { MomentResponseInput } from './moments.types'
 
@@ -135,6 +136,12 @@ export const recordMomentResponse = async (input: MomentResponseInput) => {
   }
 
   const updated = mapMoment(updatedRow)
+
+  // Broadcast the updated moment to both users
+  await Promise.all([
+    broadcastToUser(updated.userAId, 'moment_updated', { moment: updated }),
+    broadcastToUser(updated.userBId, 'moment_updated', { moment: updated }),
+  ])
 
   if (updated.userAResponse && updated.userBResponse) {
     eventBus.emit('moment_completed', { momentId: updated.id })

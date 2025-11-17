@@ -6,18 +6,18 @@ import { broadcastToRoom } from '../events/realtime.publisher'
 
 type MessageRow = {
   id: string
-  roomId: string
-  senderId: string
+  room_id: string
+  sender_id: string
   content: string
-  createdAt: string
+  created_at: string
 }
 
 const mapMessage = (row: MessageRow) => ({
   id: row.id,
-  roomId: row.roomId,
-  senderId: row.senderId,
+  roomId: row.room_id,
+  senderId: row.sender_id,
   content: row.content,
-  createdAt: row.createdAt,
+  createdAt: row.created_at,
 })
 
 export const sendMessage = async (
@@ -32,12 +32,12 @@ export const sendMessage = async (
     .from('messages')
     .insert({
       id: randomUUID(),
-      roomId,
-      senderId,
+      room_id: roomId,
+      sender_id: senderId,
       content,
       // created_at has DEFAULT NOW() so let DB handle it
     })
-    .select('*')
+    .select('id, room_id, sender_id, content, created_at')
     .single()
 
   if (error || !data) {
@@ -61,9 +61,9 @@ export const listMessages = async (roomId: string, viewerId: string) => {
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from('messages')
-    .select('*')
-    .eq('roomId', roomId)
-    .order('createdAt', { ascending: true })
+    .select('id, room_id, sender_id, content, created_at')
+    .eq('room_id', roomId)
+    .order('created_at', { ascending: true })
 
   if (error || !data) {
     throw new Error(error?.message ?? 'Unable to list messages')

@@ -31,6 +31,18 @@ export default function MomentView({ moment, roomId, isSynclight }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   const currentUserId = session?.user?.id
+
+  // Subscribe to real-time moment updates
+  useRealtimeChannel<{ moment: MomentViewModel }>(
+    currentUserId ? `user:${currentUserId}` : null,
+    'moment_updated',
+    (payload) => {
+      // Only update if this is the same moment
+      if (payload.moment.id === latestMoment.id) {
+        setLatestMoment(payload.moment)
+      }
+    }
+  )
   const isUserA = currentUserId === latestMoment.userAId
   const isUserB = currentUserId === latestMoment.userBId
   const myResponse = isUserA
