@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApi } from '@/app/hooks/useApi'
 import { useAuthSession } from '@/app/hooks/useAuthSession'
+import { useRealtimeChannel } from '@/app/hooks/useRealtimeChannel'
 import SynclightPulse from './SynclightPulse'
 
 type MomentViewModel = {
