@@ -7,17 +7,17 @@ const normalizePair = (userAId: string, userBId: string) =>
 
 type RoomRow = {
   id: string
-  createdAt: string
-  userAId: string
-  userBId: string
+  created_at: string
+  user_a_id: string
+  user_b_id: string
 }
 
 type MessageRow = {
   id: string
-  roomId: string
-  senderId: string
+  room_id: string
+  sender_id: string
   content: string
-  createdAt: string
+  created_at: string
 }
 
 type MomentRow = {
@@ -30,17 +30,17 @@ type MomentRow = {
 
 const mapRoom = (row: RoomRow) => ({
   id: row.id,
-  userAId: row.userAId,
-  userBId: row.userBId,
-  createdAt: row.createdAt,
+  userAId: row.user_a_id,
+  userBId: row.user_b_id,
+  createdAt: row.created_at,
 })
 
 const mapMessage = (row: MessageRow) => ({
   id: row.id,
-  roomId: row.roomId,
-  senderId: row.senderId,
+  roomId: row.room_id,
+  senderId: row.sender_id,
   content: row.content,
-  createdAt: row.createdAt,
+  createdAt: row.created_at,
 })
 
 const mapMomentSummary = (row: MomentRow) => ({
@@ -59,7 +59,7 @@ export const getOrCreateRoom = async (userAId: string, userBId: string) => {
     .from('rooms')
     .select('*')
     .or(
-      `and(userAId.eq.${first},userBId.eq.${second}),and(userAId.eq.${second},userBId.eq.${first})`
+      `and(user_a_id.eq.${first},user_b_id.eq.${second}),and(user_a_id.eq.${second},user_b_id.eq.${first})`
     )
     .limit(1)
     .maybeSingle()
@@ -76,8 +76,8 @@ export const getOrCreateRoom = async (userAId: string, userBId: string) => {
     .from('rooms')
     .insert({
       id: randomUUID(),
-      userAId: first,
-      userBId: second,
+      user_a_id: first,
+      user_b_id: second,
       // created_at has DEFAULT NOW() so let DB handle it
     })
     .select('*')
@@ -120,13 +120,13 @@ export const getRoomById = async (roomId: string, viewerId: string) => {
     supabase
       .from('moments')
       .select('id, prompt, createdAt, userAResponse, userBResponse')
-      .eq('roomId', roomId)
+      .eq('room_id', roomId)
       .order('createdAt', { ascending: true }),
     supabase
       .from('messages')
       .select('*')
-      .eq('roomId', roomId)
-      .order('createdAt', { ascending: true }),
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: true }),
   ])
 
   if (!moments) {
