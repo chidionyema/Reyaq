@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
 import { createSupabaseServerComponentClient } from '@/lib/supabase/server'
 import UserNav from '@/app/components/UserNav'
 
@@ -20,10 +19,11 @@ export default async function AppLayout({ children }: Props) {
     redirect('/login')
   }
 
-  const profile =
-    (await prisma.profile.findUnique({
-      where: { userId: session.user.id },
-    })) ?? undefined
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('user_id, email, full_name, avatar_url')
+    .eq('user_id', session.user.id)
+    .maybeSingle()
 
   return (
     <div className="min-h-screen bg-mist-white">
@@ -34,8 +34,8 @@ export default async function AppLayout({ children }: Props) {
           </div>
           <UserNav
             email={profile?.email ?? session.user.email}
-            fullName={profile?.fullName}
-            avatarUrl={profile?.avatarUrl}
+            fullName={profile?.full_name ?? undefined}
+            avatarUrl={profile?.avatar_url ?? undefined}
           />
         </div>
       </header>

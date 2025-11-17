@@ -1,7 +1,23 @@
-import { prisma } from '@/lib/prisma'
+import { getSupabaseServiceClient } from '@/lib/supabase/service'
 import { eventBus } from '../events/event-bus'
 import { getRoomById } from '../rooms/rooms.service'
 import { broadcastToRoom } from '../events/realtime.publisher'
+
+type MessageRow = {
+  id: string
+  room_id: string
+  sender_id: string
+  content: string
+  created_at: string
+}
+
+const mapMessage = (row: MessageRow) => ({
+  id: row.id,
+  roomId: row.room_id,
+  senderId: row.sender_id,
+  content: row.content,
+  createdAt: row.created_at,
+})
 
 export const sendMessage = async (
   roomId: string,
@@ -10,13 +26,22 @@ export const sendMessage = async (
 ) => {
   await getRoomById(roomId, senderId)
 
-  const message = await prisma.message.create({
-    data: {
-      roomId,
-      senderId,
+  const supabase = getSupabaseServiceClient()
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({
+      room_id: roomId,
+      sender_id: senderId,
       content,
-    },
-  })
+    })
+    .select('*')
+    .single()
+
+  if (error || !data) {
+    throw new Error(error?.message ?? 'Unable to send message')
+  }
+
+  const message = mapMessage(data)
 
   eventBus.emit('message_sent', {
     roomId,
@@ -30,10 +55,18 @@ export const sendMessage = async (
 
 export const listMessages = async (roomId: string, viewerId: string) => {
   await getRoomById(roomId, viewerId)
-  return prisma.message.findMany({
-    where: { roomId },
-    orderBy: { createdAt: 'asc' },
-  })
+  const supabase = getSupabaseServiceClient()
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('room_id', roomId)
+    .order('created_at', { ascending: true })
+
+  if (error || !data) {
+    throw new Error(error?.message ?? 'Unable to list messages')
+  }
+
+  return data.map(mapMessage)
 }
 
 
