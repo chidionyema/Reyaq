@@ -7,7 +7,7 @@ const normalizePair = (userAId: string, userBId: string) =>
 
 type RoomRow = {
   id: string
-  created_at: string
+  createdAt: string
   user_a_id: string
   user_b_id: string
 }
@@ -17,13 +17,13 @@ type MessageRow = {
   room_id: string
   sender_id: string
   content: string
-  created_at: string
+  createdAt: string
 }
 
 type MomentRow = {
   id: string
   prompt: string
-  created_at: string
+  createdAt: string
   user_a_response: string | null
   user_b_response: string | null
 }
@@ -32,7 +32,7 @@ const mapRoom = (row: RoomRow) => ({
   id: row.id,
   userAId: row.user_a_id,
   userBId: row.user_b_id,
-  createdAt: new Date().toISOString(), // Fallback since created_at not exposed
+  createdAt: row.createdAt,
 })
 
 const mapMessage = (row: MessageRow) => ({
@@ -119,14 +119,14 @@ export const getRoomById = async (roomId: string, viewerId: string) => {
   const [{ data: moments }, { data: messages }] = await Promise.all([
     supabase
       .from('moments')
-      .select('id, prompt, created_at, user_a_response, user_b_response')
+      .select('id, prompt, createdAt, user_a_response, user_b_response')
       .eq('room_id', roomId)
-      .order('created_at', { ascending: true }),
+      .order('createdAt', { ascending: true }),
     supabase
       .from('messages')
       .select('*')
       .eq('room_id', roomId)
-      .order('created_at', { ascending: true }),
+      .order('createdAt', { ascending: true }),
   ])
 
   if (!moments) {

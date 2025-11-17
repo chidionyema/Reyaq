@@ -6,7 +6,7 @@ import type { MomentResponseInput } from './moments.types'
 
 type MomentRow = {
   id: string
-  created_at: string
+  createdAt: string
   user_a_id: string
   user_b_id: string
   mood: string
@@ -19,7 +19,7 @@ type MomentRow = {
 
 const mapMoment = (row: MomentRow) => ({
   id: row.id,
-  createdAt: row.created_at,
+  createdAt: row.createdAt,
   userAId: row.user_a_id,
   userBId: row.user_b_id,
   mood: row.mood,
@@ -43,10 +43,13 @@ export const createMoment = async (input: CreateMomentInput) => {
   const ritual = getRitual(input.ritualId)
   const supabase = getSupabaseServiceClient()
 
+  const momentId = randomUUID()
+  const now = new Date().toISOString()
+  
   const { data, error } = await supabase
     .from('moments')
     .insert({
-      id: randomUUID(),
+      id: momentId,
       user_a_id: input.userAId,
       user_b_id: input.userBId,
       mood: input.moodId,
@@ -55,14 +58,18 @@ export const createMoment = async (input: CreateMomentInput) => {
       room_id: input.roomId ?? null,
       // created_at has DEFAULT NOW() so let DB handle it
     })
-    .select('id, created_at, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
+    .select('id, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
     .single()
 
   if (error || !data) {
     throw new Error(error?.message ?? 'Unable to create moment')
   }
 
-  const moment = mapMoment(data)
+  // Map with fallback createdAt since PostgREST might not expose it in insert response
+  const moment = mapMoment({
+    ...data,
+    createdAt: now, // Use current time as fallback
+  })
 
   createRitualContext({
     momentId: moment.id,
@@ -99,7 +106,7 @@ export const recordMomentResponse = async (input: MomentResponseInput) => {
   const supabase = getSupabaseServiceClient()
   const { data: existing, error: fetchError } = await supabase
     .from('moments')
-    .select('id, created_at, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id')
+    .select('id, createdAt, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id')
     .eq('id', input.momentId)
     .single()
 
@@ -120,7 +127,7 @@ export const recordMomentResponse = async (input: MomentResponseInput) => {
     .from('moments')
     .update(data)
     .eq('id', moment.id)
-    .select('id, created_at, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id')
+    .select('id, createdAt, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id')
     .single()
 
   if (updateError || !updatedRow) {
@@ -140,7 +147,7 @@ export const getMomentById = async (momentId: string) => {
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from('moments')
-    .select('id, created_at, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
+    .select('id, createdAt, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
     .eq('id', momentId)
     .single()
 
@@ -155,9 +162,9 @@ export const listMomentsForRoom = async (roomId: string) => {
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from('moments')
-    .select('id, created_at, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
+    .select('id, createdAt, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
     .eq('room_id', roomId)
-      .order('created_at', { ascending: true })
+      .order('createdAt', { ascending: true })
 
   if (error || !data) {
     throw new Error(error?.message ?? 'Unable to load moments')
