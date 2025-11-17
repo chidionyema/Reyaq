@@ -28,7 +28,6 @@ export const sendMessage = async (
   await getRoomById(roomId, senderId)
 
   const supabase = getSupabaseServiceClient()
-  const now = new Date().toISOString()
   const { data, error } = await supabase
     .from('messages')
     .insert({
@@ -36,7 +35,7 @@ export const sendMessage = async (
       room_id: roomId,
       sender_id: senderId,
       content,
-      created_at: now,
+      // created_at has DEFAULT NOW() so let DB handle it
     })
     .select('*')
     .single()

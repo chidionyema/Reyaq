@@ -42,7 +42,6 @@ type CreateMomentInput = {
 export const createMoment = async (input: CreateMomentInput) => {
   const ritual = getRitual(input.ritualId)
   const supabase = getSupabaseServiceClient()
-  const now = new Date().toISOString()
 
   const { data, error } = await supabase
     .from('moments')
@@ -54,7 +53,7 @@ export const createMoment = async (input: CreateMomentInput) => {
       prompt: ritual.prompt,
       synclight: input.synclight,
       room_id: input.roomId ?? null,
-      created_at: now,
+      // created_at has DEFAULT NOW() so let DB handle it
     })
     .select('*')
     .single()

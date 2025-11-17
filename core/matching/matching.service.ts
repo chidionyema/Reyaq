@@ -24,62 +24,71 @@ export const requestMatch = async (
   moodId: string
 ): Promise<MatchResponse> => {
   eventBus.emit('match_attempt', { userId, moodId })
-  const currentEntry = await enqueueUser(moodId, userId)
-  eventBus.emit('user_queued', { userId, moodId })
-
+  
+  // First check if there's already a partner waiting
   const partner = await popPartner(moodId, userId)
-  if (!partner) {
-    return { status: 'queued', moodId }
-  }
+  if (partner) {
+    // Found a partner! Remove current user from queue and create match
+    await removeUserFromQueue(userId)
+    
+    const currentEntry = {
+      userId,
+      moodId,
+      joinedAt: new Date(),
+    }
+    
+    const synclight = evaluateSynclight(currentEntry.joinedAt, partner.joinedAt)
 
-  // remove current user from queue since match found
-  await removeUserFromQueue(userId)
+    const room = await getOrCreateRoom(userId, partner.userId)
+    const moment = await createMoment({
+      userAId: partner.userId,
+      userBId: userId,
+      moodId,
+      synclight,
+      roomId: room.id,
+    })
 
-  const synclight = evaluateSynclight(currentEntry.joinedAt, partner.joinedAt)
+    eventBus.emit('match_made', {
+      userAId: partner.userId,
+      userBId: userId,
+      momentId: moment.id,
+      moodId,
+      synclight,
+    })
 
-  const room = await getOrCreateRoom(userId, partner.userId)
-  const moment = await createMoment({
-    userAId: partner.userId,
-    userBId: userId,
-    moodId,
-    synclight,
-    roomId: room.id,
-  })
+    const payload = {
+      momentId: moment.id,
+      roomId: room.id,
+      moodId,
+      synclight,
+    }
 
-  eventBus.emit('match_made', {
-    userAId: partner.userId,
-    userBId: userId,
-    momentId: moment.id,
-    moodId,
-    synclight,
-  })
+    await Promise.all([
+      broadcastToUser(userId, 'match_made', {
+        ...payload,
+        partnerId: partner.userId,
+      }),
+      broadcastToUser(partner.userId, 'match_made', {
+        ...payload,
+        partnerId: userId,
+      }),
+    ])
 
-  const payload = {
-    momentId: moment.id,
-    roomId: room.id,
-    moodId,
-    synclight,
-  }
-
-  await Promise.all([
-    broadcastToUser(userId, 'match_made', {
-      ...payload,
+    return {
+      status: 'matched',
+      momentId: moment.id,
+      roomId: room.id,
       partnerId: partner.userId,
-    }),
-    broadcastToUser(partner.userId, 'match_made', {
-      ...payload,
-      partnerId: userId,
-    }),
-  ])
-
-  return {
-    status: 'matched',
-    momentId: moment.id,
-    roomId: room.id,
-    partnerId: partner.userId,
-    synclight,
-    moodId,
+      synclight,
+      moodId,
+    }
   }
+
+  // No partner found, enqueue current user
+  await enqueueUser(moodId, userId)
+  eventBus.emit('user_queued', { userId, moodId })
+  
+  return { status: 'queued', moodId }
 }
 
 

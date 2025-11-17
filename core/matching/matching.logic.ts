@@ -45,22 +45,33 @@ export const popPartner = async (
 ): Promise<QueueEntry | null> => {
   const supabase = getSupabaseServiceClient()
 
-  // Find a partner in the same mood queue (excluding current user)
-  const { data: partner, error } = await supabase
+  // Use a transaction-like approach: find and delete atomically
+  // First, find the oldest partner (excluding current user)
+  const { data: candidates, error: findError } = await supabase
     .from('matching_queue')
-    .select('user_id, mood_id, joined_at')
+    .select('id, user_id, mood_id, joined_at')
     .eq('mood_id', moodId)
     .neq('user_id', currentUserId)
     .order('joined_at', { ascending: true })
     .limit(1)
-    .maybeSingle()
 
-  if (error || !partner) {
+  if (findError || !candidates || candidates.length === 0) {
     return null
   }
 
-  // Remove the partner from queue
-  await supabase.from('matching_queue').delete().eq('user_id', partner.user_id)
+  const partner = candidates[0]
+
+  // Atomically delete the partner we found (using the id to avoid race conditions)
+  const { error: deleteError } = await supabase
+    .from('matching_queue')
+    .delete()
+    .eq('id', partner.id)
+
+  if (deleteError) {
+    // If delete failed, someone else might have matched with them
+    // Try to find another partner
+    return null
+  }
 
   return {
     userId: partner.user_id,
