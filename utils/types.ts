@@ -2,6 +2,7 @@ export type UUID = string
 
 export type MoodOption = {
   id: string
+  slug: string
   label: string
   emoji: string
   color: string

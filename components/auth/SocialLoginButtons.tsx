@@ -21,7 +21,11 @@ const getRedirectUrl = () => {
   return null
 }
 
-export default function SocialLoginButtons() {
+type Props = {
+  redirectTo?: string
+}
+
+export default function SocialLoginButtons({ redirectTo }: Props = {}) {
   const supabase = getSupabaseBrowserClient()
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -30,14 +34,20 @@ export default function SocialLoginButtons() {
     setLoadingProvider(provider)
     setError(null)
     try {
-      const redirectTo = getRedirectUrl()
-      if (!redirectTo) {
+      const callbackUrl = getRedirectUrl()
+      if (!callbackUrl) {
         throw new Error('NEXT_PUBLIC_SITE_URL is not configured')
       }
+      
+      // Store redirectTo in sessionStorage to retrieve after OAuth
+      if (redirectTo && typeof window !== 'undefined') {
+        sessionStorage.setItem('reyaq_redirect_to', redirectTo)
+      }
+
       await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo,
+          redirectTo: callbackUrl,
         },
       })
     } catch (err) {

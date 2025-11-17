@@ -1,8 +1,41 @@
 import { listMoods } from '@/core/moods/moods.service'
 import MoodSelector from '@/app/components/MoodSelector'
+import type { MoodOption } from '@/utils/types'
 
-export default function MoodPage() {
-  const moods = listMoods()
+export const dynamic = 'force-dynamic'
+
+// Map Mood to MoodOption format
+const moodToOption = (mood: { id: string; name: string; slug: string; colorTheme: string }): MoodOption => {
+  // Map colorTheme to actual color values
+  const colorMap: Record<string, string> = {
+    rose: 'from-pink-400/80 to-rose-500/80',
+    violet: 'from-violet-400/80 to-purple-500/80',
+    pink: 'from-pink-300/80 to-fuchsia-500/80',
+    orange: 'from-orange-400/80 to-amber-500/80',
+    ember: 'from-amber-400/80 to-orange-500/80',
+  }
+
+  // Map mood names to emojis
+  const emojiMap: Record<string, string> = {
+    Tender: '🌸',
+    Curious: '🌀',
+    Lost: '🌑',
+    Anxious: '⚡',
+    Calm: '🌿',
+    Playful: '✨',
+  }
+
+  return {
+    id: mood.id,
+    label: mood.name,
+    emoji: emojiMap[mood.name] || '💫',
+    color: colorMap[mood.colorTheme] || 'from-gray-400/80 to-gray-500/80',
+  }
+}
+
+export default async function MoodPage() {
+  const moodsData = await listMoods()
+  const moods: MoodOption[] = moodsData.map(moodToOption)
 
   return (
     <div className="min-h-screen bg-mist-white text-ink-shadow">

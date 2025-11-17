@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import PostLoginRedirect from '@/app/components/PostLoginRedirect'
 
 export const metadata: Metadata = {
-  title: 'REYAQ - What we make, makes us.',
-  description: 'The first co-creation platform. No profiles. No feeds. Moments made by two.',
+  title: 'Reyaq - Emotional Weather',
+  description: 'See how people are feeling right now. No profiles. No feeds. Just feelings.',
 }
 
 export default function RootLayout({
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-mist-white text-ink-shadow">{children}</body>
+      <body className="bg-mist-white text-ink-shadow">
+        <PostLoginRedirect />
+        {children}
+      </body>
     </html>
   )
 }

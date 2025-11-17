@@ -43,7 +43,14 @@ export default function MoodSelector({ moods }: Props) {
         })
         router.push(`/app/moment/${match.momentId}?${params.toString()}`)
       } else {
-        router.push(`/app/matching?mood=${moodId}`)
+        // Find the mood slug from the selected mood
+        const selectedMood = moods.find((m) => m.id === moodId)
+        if (selectedMood) {
+          router.push(`/match/${selectedMood.slug}`)
+        } else {
+          setError('Mood not found')
+          setSelectedId(null)
+        }
       }
     } catch (err) {
       setError((err as Error).message)

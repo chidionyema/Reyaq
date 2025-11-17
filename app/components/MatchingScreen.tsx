@@ -80,7 +80,7 @@ export default function MatchingScreen({ moodId }: Props) {
         <p className="text-lg">Pick a mood to start matching.</p>
         <button
           className="mt-4 rounded-full bg-white/10 px-6 py-3 text-sm uppercase tracking-[0.3em]"
-          onClick={() => router.push('/app')}
+          onClick={() => router.push('/mood-select')}
         >
           Go to moods
         </button>
@@ -123,7 +123,7 @@ export default function MatchingScreen({ moodId }: Props) {
         )}
         <button
           className="mt-6 text-sm text-white/60 underline"
-          onClick={() => router.push('/app')}
+          onClick={() => router.push('/mood-select')}
         >
           Change mood
         </button>

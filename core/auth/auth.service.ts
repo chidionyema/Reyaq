@@ -4,6 +4,7 @@ import { createSupabaseRouteClient } from '@/lib/supabase/server'
 import { getSupabaseServiceClient } from '@/lib/supabase/service'
 import type { AuthContext, AuthenticatedProfile } from './auth.types'
 import { eventBus } from '../events/event-bus'
+import { assignPseudonym } from '../pseudonyms/pseudonyms.service'
 
 const toAuthenticatedProfile = (payload: {
   userId: string
@@ -76,6 +77,16 @@ export const syncProfileFromAuthUser = async (authUser: User) => {
       existing: !!existing,
     })
     throw new Error(error?.message ?? 'Unable to sync profile')
+  }
+
+  // Assign pseudonym if this is a new profile
+  if (!existing) {
+    try {
+      await assignPseudonym(authUser.id)
+    } catch (pseudonymError) {
+      console.error('[syncProfileFromAuthUser] Failed to assign pseudonym:', pseudonymError)
+      // Don't fail the entire login if pseudonym assignment fails
+    }
   }
 
   const profile = toAuthenticatedProfile({

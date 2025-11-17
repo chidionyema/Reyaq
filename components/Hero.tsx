@@ -18,8 +18,8 @@ export default function Hero() {
         </h1>
         
         <p className="text-lg sm:text-xl md:text-2xl text-ink-shadow/80 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          Reyaq is the first platform where every interaction is co-created. 
-          No profiles. No feeds. Just two people making something real, together.
+          A mood-based emotional platform with public Shared Emotional Spaces. 
+          No profiles. No feeds. Just anonymous expression and real connection.
         </p>
 
         <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>

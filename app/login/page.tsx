@@ -15,11 +15,13 @@ export default async function LoginPage({ searchParams = {} }: Props) {
   } = await supabase.auth.getSession()
 
   const hasError = searchParams?.error
+  // Default to landing page - never force redirect to mood-select
+  const redirectTo = searchParams?.redirectTo || '/'
 
   // Only redirect if there's a session AND no error parameter
   // This prevents redirect loops when auth fails
   if (session?.user && !hasError) {
-    redirect('/app')
+    redirect(redirectTo)
   }
 
   const errorMessage =
@@ -38,11 +40,10 @@ export default async function LoginPage({ searchParams = {} }: Props) {
           Welcome to Reyaq
         </p>
         <h1 className="mt-3 text-3xl font-semibold text-ink-shadow">
-          Sign in to co-create
+          Sign in to contribute
         </h1>
         <p className="mt-2 text-base text-ink-shadow/70">
-          Use your Google account. We&apos;ll fast-track you into the Shared Moments
-          loop.
+          Use your Google account. No profile, no followers. Just presence.
         </p>
         {errorMessage && (
           <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -50,7 +51,7 @@ export default async function LoginPage({ searchParams = {} }: Props) {
           </div>
         )}
         <div className="mt-6">
-          <SocialLoginButtons />
+            <SocialLoginButtons redirectTo={searchParams?.redirectTo} />
         </div>
       </div>
     </div>
