@@ -24,16 +24,16 @@ export const requestMatch = async (
   moodId: string
 ): Promise<MatchResponse> => {
   eventBus.emit('match_attempt', { userId, moodId })
-  const currentEntry = enqueueUser(moodId, userId)
+  const currentEntry = await enqueueUser(moodId, userId)
   eventBus.emit('user_queued', { userId, moodId })
 
-  const partner = popPartner(moodId, userId)
+  const partner = await popPartner(moodId, userId)
   if (!partner) {
     return { status: 'queued', moodId }
   }
 
   // remove current user from queue since match found
-  removeUserFromQueue(userId)
+  await removeUserFromQueue(userId)
 
   const synclight = evaluateSynclight(currentEntry.joinedAt, partner.joinedAt)
 
