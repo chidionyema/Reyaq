@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { getSupabaseServiceClient } from '@/lib/supabase/service'
 import { eventBus } from '../events/event-bus'
 import { createRitualContext, getRitual } from './rituals/ritual-engine'
@@ -41,16 +42,19 @@ type CreateMomentInput = {
 export const createMoment = async (input: CreateMomentInput) => {
   const ritual = getRitual(input.ritualId)
   const supabase = getSupabaseServiceClient()
+  const now = new Date().toISOString()
 
   const { data, error } = await supabase
     .from('moments')
     .insert({
+      id: randomUUID(),
       user_a_id: input.userAId,
       user_b_id: input.userBId,
       mood: input.moodId,
       prompt: ritual.prompt,
       synclight: input.synclight,
       room_id: input.roomId ?? null,
+      created_at: now,
     })
     .select('*')
     .single()

@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { getSupabaseServiceClient } from '@/lib/supabase/service'
 import { eventBus } from '../events/event-bus'
 import { getRoomById } from '../rooms/rooms.service'
@@ -27,12 +28,15 @@ export const sendMessage = async (
   await getRoomById(roomId, senderId)
 
   const supabase = getSupabaseServiceClient()
+  const now = new Date().toISOString()
   const { data, error } = await supabase
     .from('messages')
     .insert({
+      id: randomUUID(),
       room_id: roomId,
       sender_id: senderId,
       content,
+      created_at: now,
     })
     .select('*')
     .single()

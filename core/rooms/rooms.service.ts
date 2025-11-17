@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { getSupabaseServiceClient } from '@/lib/supabase/service'
 import { eventBus } from '../events/event-bus'
 
@@ -71,11 +72,14 @@ export const getOrCreateRoom = async (userAId: string, userBId: string) => {
     return mapRoom(existing)
   }
 
+  const now = new Date().toISOString()
   const { data, error } = await supabase
     .from('rooms')
     .insert({
+      id: randomUUID(),
       user_a_id: first,
       user_b_id: second,
+      created_at: now,
     })
     .select('*')
     .single()

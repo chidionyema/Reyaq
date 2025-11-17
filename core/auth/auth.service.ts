@@ -20,12 +20,7 @@ const toAuthenticatedProfile = (payload: {
 export const syncProfileFromAuthUser = async (authUser: User) => {
   const supabase = getSupabaseServiceClient()
 
-  const payload = {
-    user_id: authUser.id,
-    email: authUser.email ?? '',
-    full_name: authUser.user_metadata?.full_name ?? null,
-    avatar_url: authUser.user_metadata?.avatar_url ?? null,
-  }
+  const now = new Date().toISOString()
 
   // Check if profile exists
   const { data: existing } = await supabase
@@ -38,14 +33,14 @@ export const syncProfileFromAuthUser = async (authUser: User) => {
   let error
 
   if (existing) {
-    // Update existing profile
+    // Update existing profile - only update fields that can change
     const result = await supabase
       .from('profiles')
       .update({
-        email: payload.email,
-        full_name: payload.full_name,
-        avatar_url: payload.avatar_url,
-        updated_at: new Date().toISOString(),
+        email: authUser.email ?? '',
+        full_name: authUser.user_metadata?.full_name ?? null,
+        avatar_url: authUser.user_metadata?.avatar_url ?? null,
+        updated_at: now,
       })
       .eq('user_id', authUser.id)
       .select('user_id, email, full_name, avatar_url')
@@ -53,12 +48,17 @@ export const syncProfileFromAuthUser = async (authUser: User) => {
     data = result.data
     error = result.error
   } else {
-    // Insert new profile - generate UUID for id
+    // Insert new profile - explicitly set all required fields
     const result = await supabase
       .from('profiles')
       .insert({
-        ...payload,
         id: randomUUID(),
+        user_id: authUser.id,
+        email: authUser.email ?? '',
+        full_name: authUser.user_metadata?.full_name ?? null,
+        avatar_url: authUser.user_metadata?.avatar_url ?? null,
+        created_at: now,
+        updated_at: now,
       })
       .select('user_id, email, full_name, avatar_url')
       .single()
