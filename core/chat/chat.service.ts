@@ -6,18 +6,18 @@ import { broadcastToRoom } from '../events/realtime.publisher'
 
 type MessageRow = {
   id: string
-  room_id: string
-  sender_id: string
+  roomId: string
+  senderId: string
   content: string
-  created_at: string
+  createdAt: string
 }
 
 const mapMessage = (row: MessageRow) => ({
   id: row.id,
-  roomId: row.room_id,
-  senderId: row.sender_id,
+  roomId: row.roomId,
+  senderId: row.senderId,
   content: row.content,
-  createdAt: row.created_at,
+  createdAt: row.createdAt,
 })
 
 export const sendMessage = async (
@@ -32,8 +32,8 @@ export const sendMessage = async (
     .from('messages')
     .insert({
       id: randomUUID(),
-      room_id: roomId,
-      sender_id: senderId,
+      roomId,
+      senderId,
       content,
       // created_at has DEFAULT NOW() so let DB handle it
     })
@@ -62,8 +62,8 @@ export const listMessages = async (roomId: string, viewerId: string) => {
   const { data, error } = await supabase
     .from('messages')
     .select('*')
-    .eq('room_id', roomId)
-    .order('created_at', { ascending: true })
+    .eq('roomId', roomId)
+    .order('createdAt', { ascending: true })
 
   if (error || !data) {
     throw new Error(error?.message ?? 'Unable to list messages')

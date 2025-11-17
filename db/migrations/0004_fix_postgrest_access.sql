@@ -11,13 +11,13 @@ GRANT ALL PRIVILEGES ON TABLE "Moment" TO service_role, anon, authenticated;
 GRANT ALL PRIVILEGES ON TABLE "Message" TO service_role, anon, authenticated;
 
 -- Grant column-level permissions to force PostgREST to recognize all columns
-GRANT SELECT (id, created_at, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id) 
+GRANT SELECT (id, createdAt, userAId, userBId, mood, prompt, userAResponse, userBResponse, synclight, roomId) 
 ON "Moment" TO anon, authenticated, service_role;
 
-GRANT SELECT (id, created_at, user_a_id, user_b_id) 
+GRANT SELECT (id, createdAt, userAId, userBId) 
 ON "Room" TO anon, authenticated, service_role;
 
-GRANT SELECT (id, room_id, sender_id, content, created_at) 
+GRANT SELECT (id, roomId, senderId, content, createdAt) 
 ON "Message" TO anon, authenticated, service_role;
 
 -- Grant all privileges on all existing tables to service_role (for server-side operations)

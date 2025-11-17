@@ -17,6 +17,6 @@ ORDER BY ordinal_position;
 
 -- If created_at exists but PostgREST can't see it, try granting explicit column permissions
 -- This forces PostgREST to recognize the column
-GRANT SELECT (id, created_at, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id) 
+GRANT SELECT (id, createdAt, userAId, userBId, mood, prompt, userAResponse, userBResponse, synclight, roomId) 
 ON "Moment" TO anon, authenticated, service_role;
 

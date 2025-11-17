@@ -8,14 +8,14 @@ const normalizePair = (userAId: string, userBId: string) =>
 type RoomRow = {
   id: string
   createdAt: string
-  user_a_id: string
-  user_b_id: string
+  userAId: string
+  userBId: string
 }
 
 type MessageRow = {
   id: string
-  room_id: string
-  sender_id: string
+  roomId: string
+  senderId: string
   content: string
   createdAt: string
 }
@@ -24,31 +24,31 @@ type MomentRow = {
   id: string
   prompt: string
   createdAt: string
-  user_a_response: string | null
-  user_b_response: string | null
+  userAResponse: string | null
+  userBResponse: string | null
 }
 
 const mapRoom = (row: RoomRow) => ({
   id: row.id,
-  userAId: row.user_a_id,
-  userBId: row.user_b_id,
+  userAId: row.userAId,
+  userBId: row.userBId,
   createdAt: row.createdAt,
 })
 
 const mapMessage = (row: MessageRow) => ({
   id: row.id,
-  roomId: row.room_id,
-  senderId: row.sender_id,
+  roomId: row.roomId,
+  senderId: row.senderId,
   content: row.content,
-  createdAt: new Date().toISOString(), // Fallback since created_at not exposed
+  createdAt: row.createdAt,
 })
 
 const mapMomentSummary = (row: MomentRow) => ({
   id: row.id,
   prompt: row.prompt,
-  createdAt: new Date().toISOString(), // Fallback since created_at not exposed
-  userAResponse: row.user_a_response,
-  userBResponse: row.user_b_response,
+  createdAt: row.createdAt,
+  userAResponse: row.userAResponse,
+  userBResponse: row.userBResponse,
 })
 
 export const getOrCreateRoom = async (userAId: string, userBId: string) => {
@@ -59,7 +59,7 @@ export const getOrCreateRoom = async (userAId: string, userBId: string) => {
     .from('rooms')
     .select('*')
     .or(
-      `and(user_a_id.eq.${first},user_b_id.eq.${second}),and(user_a_id.eq.${second},user_b_id.eq.${first})`
+      `and(userAId.eq.${first},userBId.eq.${second}),and(userAId.eq.${second},userBId.eq.${first})`
     )
     .limit(1)
     .maybeSingle()
@@ -76,8 +76,8 @@ export const getOrCreateRoom = async (userAId: string, userBId: string) => {
     .from('rooms')
     .insert({
       id: randomUUID(),
-      user_a_id: first,
-      user_b_id: second,
+      userAId: first,
+      userBId: second,
       // created_at has DEFAULT NOW() so let DB handle it
     })
     .select('*')
@@ -119,13 +119,13 @@ export const getRoomById = async (roomId: string, viewerId: string) => {
   const [{ data: moments }, { data: messages }] = await Promise.all([
     supabase
       .from('moments')
-      .select('id, prompt, createdAt, user_a_response, user_b_response')
-      .eq('room_id', roomId)
+      .select('id, prompt, createdAt, userAResponse, userBResponse')
+      .eq('roomId', roomId)
       .order('createdAt', { ascending: true }),
     supabase
       .from('messages')
       .select('*')
-      .eq('room_id', roomId)
+      .eq('roomId', roomId)
       .order('createdAt', { ascending: true }),
   ])
 

@@ -7,27 +7,27 @@ import type { MomentResponseInput } from './moments.types'
 type MomentRow = {
   id: string
   createdAt: string
-  user_a_id: string
-  user_b_id: string
+  userAId: string
+  userBId: string
   mood: string
   prompt: string
-  user_a_response: string | null
-  user_b_response: string | null
+  userAResponse: string | null
+  userBResponse: string | null
   synclight: boolean
-  room_id: string | null
+  roomId: string | null
 }
 
 const mapMoment = (row: MomentRow) => ({
   id: row.id,
   createdAt: row.createdAt,
-  userAId: row.user_a_id,
-  userBId: row.user_b_id,
+  userAId: row.userAId,
+  userBId: row.userBId,
   mood: row.mood,
   prompt: row.prompt,
-  userAResponse: row.user_a_response,
-  userBResponse: row.user_b_response,
+  userAResponse: row.userAResponse,
+  userBResponse: row.userBResponse,
   synclight: row.synclight,
-  roomId: row.room_id ?? undefined,
+  roomId: row.roomId ?? undefined,
 })
 
 type CreateMomentInput = {
@@ -50,15 +50,15 @@ export const createMoment = async (input: CreateMomentInput) => {
     .from('moments')
     .insert({
       id: momentId,
-      user_a_id: input.userAId,
-      user_b_id: input.userBId,
+      userAId: input.userAId,
+      userBId: input.userBId,
       mood: input.moodId,
       prompt: ritual.prompt,
       synclight: input.synclight,
-      room_id: input.roomId ?? null,
+      roomId: input.roomId ?? null,
       // created_at has DEFAULT NOW() so let DB handle it
     })
-    .select('id, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
+    .select('id, userAId, userBId, mood, prompt, userAResponse, userBResponse, synclight, roomId')
     .single()
 
   if (error || !data) {
@@ -106,7 +106,7 @@ export const recordMomentResponse = async (input: MomentResponseInput) => {
   const supabase = getSupabaseServiceClient()
   const { data: existing, error: fetchError } = await supabase
     .from('moments')
-    .select('id, createdAt, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id')
+    .select('id, createdAt, userAId, userBId, userAResponse, userBResponse, mood, prompt, synclight, roomId')
     .eq('id', input.momentId)
     .single()
 
@@ -120,14 +120,14 @@ export const recordMomentResponse = async (input: MomentResponseInput) => {
 
   const data =
     moment.userAId === input.userId
-      ? { user_a_response: input.response }
-      : { user_b_response: input.response }
+      ? { userAResponse: input.response }
+      : { userBResponse: input.response }
 
   const { data: updatedRow, error: updateError } = await supabase
     .from('moments')
     .update(data)
     .eq('id', moment.id)
-    .select('id, createdAt, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id')
+    .select('id, createdAt, userAId, userBId, userAResponse, userBResponse, mood, prompt, synclight, roomId')
     .single()
 
   if (updateError || !updatedRow) {
@@ -147,7 +147,7 @@ export const getMomentById = async (momentId: string) => {
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from('moments')
-    .select('id, createdAt, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
+    .select('id, createdAt, userAId, userBId, mood, prompt, userAResponse, userBResponse, synclight, roomId')
     .eq('id', momentId)
     .single()
 
@@ -162,8 +162,8 @@ export const listMomentsForRoom = async (roomId: string) => {
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from('moments')
-    .select('id, createdAt, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
-    .eq('room_id', roomId)
+    .select('id, createdAt, userAId, userBId, mood, prompt, userAResponse, userBResponse, synclight, roomId')
+    .eq('roomId', roomId)
       .order('createdAt', { ascending: true })
 
   if (error || !data) {
