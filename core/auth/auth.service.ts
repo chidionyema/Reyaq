@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import type { User } from '@supabase/supabase-js'
 import { createSupabaseRouteClient } from '@/lib/supabase/server'
 import { getSupabaseServiceClient } from '@/lib/supabase/service'
@@ -52,10 +53,13 @@ export const syncProfileFromAuthUser = async (authUser: User) => {
     data = result.data
     error = result.error
   } else {
-    // Insert new profile (let DB generate id)
+    // Insert new profile - generate UUID for id
     const result = await supabase
       .from('profiles')
-      .insert(payload)
+      .insert({
+        ...payload,
+        id: randomUUID(),
+      })
       .select('user_id, email, full_name, avatar_url')
       .single()
     data = result.data

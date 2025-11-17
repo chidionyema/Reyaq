@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: Props) {
     .maybeSingle()
 
   return (
-    <div className="min-h-screen bg-mist-white">
+    <div className="min-h-screen bg-mist-white text-ink-shadow">
       <header className="border-b border-ink-shadow/5 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <div className="text-sm font-semibold uppercase tracking-[0.5em] text-ink-shadow">

@@ -106,7 +106,7 @@ export default function MatchingScreen({ moodId }: Props) {
           Finding someone on your wavelength…
         </h1>
         <p className="text-base text-white/70">
-          Stay with us. When someone else picks this mood, we’ll pull you both
+          Stay with us. When someone else picks this mood, we&apos;ll pull you both
           into a shared moment instantly.
         </p>
         <div className="relative mt-4 flex h-40 w-40 items-center justify-center rounded-full bg-gradient-violet-pink text-xl font-semibold shadow-2xl">
