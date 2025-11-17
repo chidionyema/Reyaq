@@ -31,7 +31,13 @@ export async function GET(request: Request) {
     return errorRedirect(requestUrl, 'auth')
   }
 
-  await syncProfileFromAuthUser(session.user)
+  try {
+    await syncProfileFromAuthUser(session.user)
+  } catch (error) {
+    console.error('[auth/callback] Profile sync failed:', error)
+    // Continue anyway - session is valid, profile sync can be retried
+    // Don't block the user from accessing the app
+  }
 
   return NextResponse.redirect(new URL(redirectTo, requestUrl.origin))
 }
