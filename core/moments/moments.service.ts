@@ -55,7 +55,7 @@ export const createMoment = async (input: CreateMomentInput) => {
       room_id: input.roomId ?? null,
       // created_at has DEFAULT NOW() so let DB handle it
     })
-    .select('id, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id, created_at')
+    .select('id, created_at, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
     .single()
 
   if (error || !data) {
@@ -99,7 +99,7 @@ export const recordMomentResponse = async (input: MomentResponseInput) => {
   const supabase = getSupabaseServiceClient()
   const { data: existing, error: fetchError } = await supabase
     .from('moments')
-    .select('id, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id, created_at')
+    .select('id, created_at, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id')
     .eq('id', input.momentId)
     .single()
 
@@ -120,7 +120,7 @@ export const recordMomentResponse = async (input: MomentResponseInput) => {
     .from('moments')
     .update(data)
     .eq('id', moment.id)
-    .select('id, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id, created_at')
+    .select('id, created_at, user_a_id, user_b_id, user_a_response, user_b_response, mood, prompt, synclight, room_id')
     .single()
 
   if (updateError || !updatedRow) {
@@ -140,7 +140,7 @@ export const getMomentById = async (momentId: string) => {
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from('moments')
-    .select('id, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id, created_at')
+    .select('id, created_at, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
     .eq('id', momentId)
     .single()
 
@@ -155,9 +155,9 @@ export const listMomentsForRoom = async (roomId: string) => {
   const supabase = getSupabaseServiceClient()
   const { data, error } = await supabase
     .from('moments')
-    .select('id, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id, created_at')
+    .select('id, created_at, user_a_id, user_b_id, mood, prompt, user_a_response, user_b_response, synclight, room_id')
     .eq('room_id', roomId)
-    .order('created_at', { ascending: true })
+      .order('created_at', { ascending: true })
 
   if (error || !data) {
     throw new Error(error?.message ?? 'Unable to load moments')

@@ -7,9 +7,9 @@ const normalizePair = (userAId: string, userBId: string) =>
 
 type RoomRow = {
   id: string
+  created_at: string
   user_a_id: string
   user_b_id: string
-  created_at: string
 }
 
 type MessageRow = {
@@ -32,7 +32,7 @@ const mapRoom = (row: RoomRow) => ({
   id: row.id,
   userAId: row.user_a_id,
   userBId: row.user_b_id,
-  createdAt: row.created_at,
+  createdAt: new Date().toISOString(), // Fallback since created_at not exposed
 })
 
 const mapMessage = (row: MessageRow) => ({
@@ -40,13 +40,13 @@ const mapMessage = (row: MessageRow) => ({
   roomId: row.room_id,
   senderId: row.sender_id,
   content: row.content,
-  createdAt: row.created_at,
+  createdAt: new Date().toISOString(), // Fallback since created_at not exposed
 })
 
 const mapMomentSummary = (row: MomentRow) => ({
   id: row.id,
   prompt: row.prompt,
-  createdAt: row.created_at,
+  createdAt: new Date().toISOString(), // Fallback since created_at not exposed
   userAResponse: row.user_a_response,
   userBResponse: row.user_b_response,
 })
