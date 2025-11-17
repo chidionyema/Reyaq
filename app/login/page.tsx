@@ -41,7 +41,7 @@ export default async function LoginPage({ searchParams = {} }: Props) {
           Sign in to co-create
         </h1>
         <p className="mt-2 text-base text-ink-shadow/70">
-          Use your Google account. We'll fast-track you into the Shared Moments
+          Use your Google account. We&apos;ll fast-track you into the Shared Moments
           loop.
         </p>
         {errorMessage && (
