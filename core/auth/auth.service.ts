@@ -33,6 +33,13 @@ export const syncProfileFromAuthUser = async (authUser: User) => {
     .single()
 
   if (error || !data) {
+    console.error('[syncProfileFromAuthUser] Supabase error:', {
+      error: error?.message,
+      code: error?.code,
+      details: error?.details,
+      hint: error?.hint,
+      userId: authUser.id,
+    })
     throw new Error(error?.message ?? 'Unable to sync profile')
   }
 

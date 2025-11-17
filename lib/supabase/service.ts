@@ -24,6 +24,14 @@ const createSupabaseServiceClient = () =>
 
 export const getSupabaseServiceClient = (): ServiceClient => {
   if (!serviceClient) {
+    // Verify env vars are set (will throw if missing)
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      console.error('[getSupabaseServiceClient] Missing env vars:', {
+        hasUrl: !!supabaseUrl,
+        hasServiceKey: !!supabaseServiceRoleKey,
+        serviceKeyLength: supabaseServiceRoleKey?.length ?? 0,
+      })
+    }
     serviceClient = createSupabaseServiceClient()
   }
   return serviceClient!
